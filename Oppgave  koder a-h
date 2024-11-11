@@ -1,0 +1,150 @@
+file_path = "C:/Users/norah/Documents/ssb-barnehager-2015-2023-alder-1-2-aar.xlsx"
+
+# Importere tabell
+import pandas as pd
+import altair as alt
+from pandas import testing as tm
+
+kosandeldatadata = pd.read_excel("ssb-barnehager-2015-2023-alder-1-2-aar.xlsm",
+                                 sheet_name="KOSandel120000",
+                                 header=3,  # Start fra rad 4 i Excel
+                                 names=['kommune', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'],
+                                 na_values=['.', '..'])  # Erstatt '.' og '..' med NaN
+
+kosandeldatadata = kosandeldatadata[0:724]
+
+for element in ['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023']:
+    kosandeldatadata.loc[kosandeldatadata[element] > 100, element] = float("nan")
+
+
+
+
+#Oppgave 2a
+# Velg ut data for kolonne 2023
+kosandeldatadata["2023"] = kosandeldatadata["2023"].round(1)  # Rund av til én desimal
+
+# Finn den høyeste prosenten i kolonne 2023
+hoyeste_prosent = kosandeldatadata["2023"].max()
+
+# Filtrer ut kommuner som har den høyeste prosenten
+kommuner_med_hoyeste_prosent = kosandeldatadata[kosandeldatadata["2023"] == hoyeste_prosent][["kommune", "2023"]]
+
+# Vis resultatet
+print("Kommuner med den høyeste prosenten barn i barnehage i 2023:")
+print(kommuner_med_hoyeste_prosent)
+
+#Oppgave 2b
+# Velg ut data for kolonne 2023 og rund av til én desimal
+kosandeldatadata["2023"] = kosandeldatadata["2023"].round(1)
+
+# Finn den laveste prosenten i kolonne 2023
+laveste_prosent = kosandeldatadata["2023"].min()
+
+# Filtrer ut kommuner som har den laveste prosenten
+kommuner_med_laveste_prosent = kosandeldatadata[kosandeldatadata["2023"] == laveste_prosent][["kommune", "2023"]]
+
+# Vis resultatet
+print("Kommuner med den laveste prosenten barn i barnehage i 2023:")
+print(kommuner_med_laveste_prosent)
+
+
+#Oppgave 2c
+# Beregn gjennomsnittet for årene 2015-2023 for hver kommune og rund av til én desimal
+kosandeldatadata['mean'] = kosandeldatadata[['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023']].mean(axis=1).round(1)
+
+# Finn den høyeste gjennomsnittlige prosenten
+hoyeste_gjennomsnitt = kosandeldatadata['mean'].max()
+
+# Filtrer ut kommuner som har den høyeste gjennomsnittlige prosenten
+kommuner_med_hoyeste_gjennomsnitt = kosandeldatadata[kosandeldatadata['mean'] == hoyeste_gjennomsnitt][["kommune", "mean"]]
+
+# Vis resultatet
+print("Kommuner med den høyeste gjennomsnittlige prosenten barn i barnehage fra 2015 til 2023:")
+print(kommuner_med_hoyeste_gjennomsnitt)
+
+
+#Oppgave 2d
+# Beregn gjennomsnittet for årene 2015-2023 for hver kommune og rund av til én desimal
+kosandeldatadata['mean'] = kosandeldatadata[['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023']].mean(axis=1).round(1)
+
+# Finn den laveste gjennomsnittlige prosenten
+laveste_gjennomsnitt = kosandeldatadata['mean'].min()
+
+# Filtrer ut kommuner som har den laveste gjennomsnittlige prosenten
+kommuner_med_laveste_gjennomsnitt = kosandeldatadata[kosandeldatadata['mean'] == laveste_gjennomsnitt][["kommune", "mean"]]
+
+# Vis resultatet
+print("Kommuner med den laveste gjennomsnittlige prosenten barn i barnehage fra 2015 til 2023:")
+print(kommuner_med_laveste_gjennomsnitt)
+
+#Oppgave 2f
+# Velg år (endre verdien for å beregne for et annet år)
+valgt_aar = "2020"
+
+# Beregn gjennomsnittet av prosenten for alle kommuner for det spesifikke året
+gjennomsnitt_aar = kosandeldatadata[valgt_aar].mean().round(1)
+
+# Vis resultatet
+print(f"Gjennomsnittlig prosent for alle kommuner i {valgt_aar}: {gjennomsnitt_aar}%")
+
+
+#Oppgave 2g
+import altair as alt
+import webbrowser
+import os
+
+# Forutsetter at 'kosandeldatadata' allerede er lastet inn
+# Eksempel for oppgave 2G: Lag diagram for en valgt kommune
+kommune_navn = "Bærum"  # Bytt ut med ønsket kommunenavn
+
+# Filtrer data for den valgte kommunen
+kommune_data = kosandeldatadata[kosandeldatadata["kommune"] == kommune_navn]
+
+# Smelt data for å få et format som passer til plotting
+kommune_melted = kommune_data.melt(
+    id_vars=["kommune"],
+    value_vars=['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'],
+    var_name="År",
+    value_name="Prosentandel"
+)
+
+# Lag diagrammet
+diagram = alt.Chart(kommune_melted).mark_bar().encode(
+    x='År:O',
+    y='Prosentandel:Q'
+)
+
+# Lagre diagrammet som en HTML-fil
+diagram_file = "kommune_diagram.html"
+diagram.save(diagram_file)
+
+# Åpne HTML-filen i nettleseren
+webbrowser.open('file://' + os.path.abspath(diagram_file))
+
+ #Oppgave 2h
+
+import altair as alt
+import webbrowser
+import os
+
+# Beregn gjennomsnittlig prosent for årene 2015-2023 for hver kommune
+gjennomsnitt_per_kommune = kosandeldatadata[['kommune', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023']].set_index('kommune').mean(axis=1)
+
+# Sorter denne tabellen for å finne de 10 kommunene med høyest gjennomsnitt
+hoyeste_gjennomsnitt_kommuner = gjennomsnitt_per_kommune.sort_values(ascending=False).head(10)
+
+# Konverter resultatet til en DataFrame for enklere bruk i plotting
+hoyeste_gjennomsnitt_kommuner = hoyeste_gjennomsnitt_kommuner.reset_index()
+hoyeste_gjennomsnitt_kommuner.columns = ['Kommune', 'Gjennomsnittlig Prosentandel']
+
+# Lag diagrammet
+diagram = alt.Chart(hoyeste_gjennomsnitt_kommuner).mark_bar().encode(
+    x=alt.X('Kommune', sort='-y'),  # Sorter fra høyest til lavest
+    y='Gjennomsnittlig Prosentandel',
+    tooltip=['Kommune', 'Gjennomsnittlig Prosentandel']
+)
+
+# Lagre diagrammet som HTML og åpne det i nettleseren
+diagram_file = "hoyeste_gjennomsnitt_kommuner_diagram.html"
+diagram.save(diagram_file)
+webbrowser.open('file://' + os.path.abspath(diagram_file))
